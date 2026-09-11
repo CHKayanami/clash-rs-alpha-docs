@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5722"/>
+      <stop offset="50%" stop-color="#E64A19"/>
+      <stop offset="100%" stop-color="#D84315"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#646cff"/>
+      <stop offset="100%" stop-color="#9064ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Shield/Hexagon -->
+  <rect x="8" y="8" width="84" height="84" rx="22" fill="url(#grad)" filter="drop-shadow(0 4px 12px rgba(230,74,25,0.35))"/>
+  <!-- Network Routing Nodes & Connections -->
+  <circle cx="28" cy="36" r="6" fill="#FFF" opacity="0.9"/>
+  <circle cx="72" cy="36" r="6" fill="#FFF" opacity="0.9"/>
+  <circle cx="50" cy="70" r="7" fill="#FFF"/>
+  <path d="M28 36L50 70M72 36L50 70" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 3" opacity="0.8"/>
+  <!-- Central Rust Crab Claw / Lightning Accent -->
+  <path d="M47 22L40 45H53L48 64L63 39H50L55 22H47Z" fill="#FFE082"/>
+</svg>

@@ -1,0 +1,47 @@
+:root {
+  --vp-c-brand-1: #e65100;
+  --vp-c-brand-2: #f57c00;
+  --vp-c-brand-3: #ff9800;
+  --vp-c-brand-soft: rgba(230, 81, 0, 0.14);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #e65100 20%, #7c4dff 85%);
+  --vp-home-hero-image-filter: drop-shadow(0 0 35px rgba(230, 81, 0, 0.3));
+}
+
+.dark {
+  --vp-c-brand-1: #ff7043;
+  --vp-c-brand-2: #ff8a65;
+  --vp-c-brand-3: #ffab91;
+  --vp-c-brand-soft: rgba(255, 112, 67, 0.16);
+
+  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #ff7043 20%, #b388ff 85%);
+  --vp-home-hero-image-filter: drop-shadow(0 0 45px rgba(255, 112, 67, 0.45));
+}
+
+/* 增强表格样式与代码块排版 */
+table {
+  display: table;
+  width: 100%;
+  margin: 1.2rem 0;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px 14px;
+}
+
+.vp-doc h1 {
+  letter-spacing: -0.02em;
+}
+
+.vp-doc h2 {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 1.2rem;
+  margin-top: 2rem;
+}
+
+.vp-doc .custom-block {
+  border-radius: 8px;
+  margin: 1rem 0;
+}
