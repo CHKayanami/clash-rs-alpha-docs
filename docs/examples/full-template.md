@@ -182,6 +182,14 @@ proxy-groups:
     url: "http://www.gstatic.com/generate_204"
     interval: 300
 
+  - name: "HK-Auto"
+    type: url-test
+    include-all: true
+    filter: "(?i)香港|HK|HongKong"
+    empty-fallback: "DIRECT"
+    url: "http://www.gstatic.com/generate_204"
+    interval: 300
+
 # ── 16. 规则提供者 (Rule Providers，推荐按需引入 mrs 格式) ───────────────────
 # 规则源自：https://github.com/DustinWin/ruleset_geodata/releases#release-mihomo-ruleset
 rule-providers:
@@ -205,6 +213,7 @@ rule-providers:
 rules:
   - DOMAIN-SUFFIX,google.com,PROXY
   - DOMAIN-KEYWORD,github,PROXY
+  - AND,((DOMAIN,baidu.com),(NETWORK,UDP)),DIRECT
   - RULE-SET,cn-domain,DIRECT
   - RULE-SET,cn-ip,DIRECT,no-resolve
   - MATCH,PROXY

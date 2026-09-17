@@ -18,8 +18,10 @@
 | **`mode`** | **枚举** | 可选 | `rule` | 路由工作模式 (`rule` / `global` / `direct`) | [基础通用配置](/configuration/general) |
 | **`log-level`** | **枚举** | 可选 | `info` | 日志输出级别 (`trace` / `debug` / `info` / `warn` / `error` / `off`) | [基础通用配置](/configuration/general) |
 | **`ipv6`** | 布尔值 | 可选 | `false` | 是否启用 IPv6 DNS 响应与解析支持 | [基础通用配置](/configuration/general) |
+| **`routing-mark`** | 整数 (u32) | 可选 | 无 | Linux 平台 Clash 自身出站流量的 fwmark 标记（防止路由环路） | [基础通用配置](/configuration/general#防火墙标记与接口绑定) |
 | **`external-controller`** | 字符串 | 可选 | 无 (不开启) | 外部控制 REST API 监听地址（如 `127.0.0.1:9090`） | [外部控制器](/configuration/external-controller) |
 | **`external-controller-unix`** | 字符串 | 可选 | 无 | Unix Domain Socket 路径 (Linux/macOS) | [外部控制器](/configuration/external-controller) |
+| **`external-controller-pipe`** | 字符串 | 可选 | 无 | Windows Named Pipe 命名管道路径 (Windows 专属) | [外部控制器](/configuration/external-controller) |
 | **`secret`** | 字符串 | 可选 | `""` (无密码) | 外部控制 API 访问认证密钥 (Bearer Token) | [外部控制器](/configuration/external-controller) |
 | **`external-ui`** | 字符串 | 可选 | 默认内置面板 | 外部自定义面板目录（省略此项则默认使用官方内置面板） | [外部控制器](/configuration/external-controller) |
 | **`external-ui-url`** | 字符串 | 可选 | 无 | 自动下载并解压 Web UI 压缩包的链接 | [外部控制器](/configuration/external-controller) |
@@ -27,7 +29,7 @@
 | **`dns`** | 对象 | 可选 | 见章节 | 传统本地 DNS 解析器配置 | [传统 DNS 引擎](/configuration/dns) |
 | **`dns2`** | 对象 | 可选 | 见章节 | **更灵活的DNS (DNS2) ⚡** (优先于 `dns:`) | [更灵活的DNS](/configuration/dns2) |
 | **`hosts`** | 映射 | 可选 | `{}` | 静态主机名解析绑定映射 | [传统 DNS 引擎](/configuration/dns#静态-hosts-解析-hosts) |
-| **`sniffer`** | 对象 | 可选 | 见章节 | 应用层域名嗅探器配置 | [域名嗅探](/configuration/sniffer) |
+| **`sniffer`** | 对象 | 可选 | 见章节 | 应用层域名嗅特器配置 | [域名嗅探](/configuration/sniffer) |
 | **`tun`** | 对象 | 可选 | 见章节 | 全局虚拟网卡透明代理模式配置 | [TUN 虚拟网卡](/configuration/tun) |
 | **`ebpf`** | 对象 | 可选 | 见章节 | **Linux eBPF 内核线速透明代理 ⚡** | [eBPF 透明代理](/configuration/ebpf) |
 | **`listeners`** | 数组 | 可选 | `[]` | 细粒度显式入站监听器列表 | [入站协议与 Listeners](/configuration/inbounds) |
@@ -39,6 +41,39 @@
 | **`rule-providers`** | 映射 | 可选 | `{}` | 动态规则集提供者 (**推荐 MRS 二进制格式**) | [规则提供者](/configuration/rule-providers) |
 | **`profile`** | 对象 | 可选 | 见章节 | 运行时状态持久化控制 | [缓存与geo数据](/configuration/profile-and-databases) |
 | **`mmdb`** / **`geosite`** | 字符串 | 可选 | 无 | GeoIP / GeoSite 本地数据文件路径 (*兼容遗留，不推荐全量文件*) | [缓存与geo数据](/configuration/profile-and-databases) |
+| **`experimental`** | 对象 | 可选 | 见章节 | 实验性底层优化参数（TCP 缓冲区大小） | [基础通用配置](/configuration/general#实验性底层参数-experimental) |
+
+---
+
+## YAML 锚点与合并引用特性 ⚡
+
+`clash-rs` 全面支持标准 YAML 规范的**锚点（Anchors, `&`）**与**合并键（Merge Keys, `<<: *`）**。你可以将重复出现的节点配置、TLS 选项或健康检查模板提取为公共锚点，大幅缩减配置文件体积：
+
+```yaml
+# 1. 定义公共节点通用模板锚点
+pr: &default-node
+  type: socks5
+  server: 127.0.0.1
+  port: 1080
+  udp: true
+
+# 2. 定义健康检查公共模板
+hc: &default-health-check
+  enable: true
+  url: "http://www.gstatic.com/generate_204"
+  interval: 300
+
+proxies:
+  - name: "node-01"
+    <<: *default-node
+    server: 1.1.1.1
+    port: 8080
+
+  - name: "node-02"
+    <<: *default-node
+    server: 2.2.2.2
+    port: 9090
+```
 
 ---
 

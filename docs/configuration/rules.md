@@ -59,33 +59,23 @@ rules:
 | 规则类型 | 示例 | 说明 |
 | :--- | :--- | :--- |
 | `IP-CIDR` | `IP-CIDR,192.168.0.0/16,DIRECT` | 目标 IPv4 掩码网段匹配（支持 `,no-resolve`） |
-| `IP-CIDR6` | `IP-CIDR6,2001:db8::/32,DIRECT` | 目标 IPv6 掩码网段匹配（支持 `,no-resolve`） |
-| `GEOIP` | `GEOIP,CN,DIRECT` | 基于 MaxMind MMDB 匹配目标 IP 归属国（*⚠️ **必须明确配置 `mmdb` 与下载地址**，否则查询直接失效；建议改用 `RULE-SET` 配合 MRS*） |
-| `IP-ASN` | `IP-ASN,13335,PROXY` | 匹配目标 IP 所属自治系统编号（*⚠️ **必须明确配置 `asn-mmdb` 与下载地址**，否则无法匹配*） |
+| `IP-CIDR6` | `IP-CIDR6,2001:db8::/32,DIRECT` | 目标 IPv6 掩码网段匹配（别名 `IP-CIDR`，支持 `,no-resolve`） |
+| `GEOIP` | `GEOIP,CN,DIRECT` | 基于 MaxMind MMDB 匹配目标 IP 归属国（支持 `,no-resolve`；*⚠️ **必须明确配置 `mmdb` 与下载地址**，否则查询直接失效；建议改用 `RULE-SET` 配合 MRS*） |
 
 ---
 
-### 3. 源地址与端口类型
+### 3. 网络协议、源地址与端口类型
 
 | 规则类型 | 示例 | 说明 |
 | :--- | :--- | :--- |
-| `SRC-IP-CIDR` | `SRC-IP-CIDR,192.168.1.50/32,PROXY` | 匹配发起请求的客户端局域网源 IP |
+| `NETWORK` | `NETWORK,UDP,PROXY` | 匹配底层网络传输协议，可选 `TCP` 或 `UDP`（大小写不敏感） |
+| `SRC-IP-CIDR` | `SRC-IP-CIDR,192.168.1.50/32,PROXY` | 匹配发起请求的客户端局域网源 IP（支持 `,no-resolve`） |
 | `SRC-PORT` | `SRC-PORT,1234,DIRECT` | 匹配发起请求的源端口 |
 | `DST-PORT` | `DST-PORT,80,DIRECT` | 匹配访问的目标端口（如 `443` 或 `80`） |
 
 ---
 
-### 4. 监听器与身份来源类型
-
-| 规则类型 | 示例 | 说明 |
-| :--- | :--- | :--- |
-| `IN-NAME` | `IN-NAME,ss-in,PROXY` | 匹配流量进入的具体监听器名称（在 `listeners:` 中定义） |
-| `IN-TYPE` | `IN-TYPE,tproxy,PROXY` | 匹配入站类型（如 `http` / `socks` / `tproxy` / `tun`） |
-| `IN-USER` | `IN-USER,alice,SPECIAL-GROUP` | 匹配通过特定账号登录的用户（如 SS2022 / AnyTLS 多用户） |
-
----
-
-### 5. 进程名称类型
+### 4. 本地进程类型
 
 | 规则类型 | 示例 | 说明 |
 | :--- | :--- | :--- |
@@ -94,12 +84,45 @@ rules:
 
 ---
 
-### 6. 规则集与最终兜底
+### 5. 规则集与最终兜底
 
 | 规则类型 | 示例 | 说明 |
 | :--- | :--- | :--- |
-| `RULE-SET` <br>*(官方首推)* | `RULE-SET,cn-domain,DIRECT` | **首选分流方式**。引用 [rule-providers](/configuration/rule-providers) 声明的高性能二进制（MRS）或 YAML 规则集 |
+| `RULE-SET` <br>*(官方首推)* | `RULE-SET,cn-domain,DIRECT` | **首选分流方式**。引用 [rule-providers](/configuration/rule-providers) 声明的高性能二进制（MRS）或 YAML 规则集（支持 `,no-resolve`） |
 | `MATCH` | `MATCH,FINAL` | **全局最终兜底规则**。若前面所有规则均未命中，流量一律走此规则 |
+
+---
+
+## 复合逻辑规则 (`AND`, `OR`, `NOT`) ⚡
+
+`clash-rs` 支持对基础规则进行布尔逻辑组合，支持 `AND`（且）、`OR`（或）、`NOT`（非）以及任意层级的深度嵌套：
+
+### 语法结构
+
+```yaml
+- 操作符,((子规则1),(子规则2),...),目标策略
+```
+
+- **`AND`**：括号内的所有子规则必须**同时命中**，才导向目标策略。
+- **`OR`**：括号内的子规则只要有**任意一条命中**，即导向目标策略。
+- **`NOT`**：括号内的子规则**未命中**时，才导向目标策略。
+
+### 实战示例
+
+```yaml
+rules:
+  # 示例 1：仅将百度的 UDP 流量导向 DIRECT（例如仅针对特定服务的 QUIC 流量特殊处理）
+  - AND,((DOMAIN,baidu.com),(NETWORK,UDP)),DIRECT
+
+  # 示例 2：当流量为 UDP 或访问目标域名为 example.com 时，均调度至 PROXY
+  - OR,((NETWORK,UDP),(DOMAIN,example.com)),PROXY
+
+  # 示例 3：除了特定域名外，其余流量导向特定代理组
+  - NOT,((DOMAIN,baidu.com)),PROXY
+
+  # 示例 4：多层复杂嵌套 — 访问 example.com 且（来源是特定局域网 IP 或特定源端口）时直连
+  - AND,((DOMAIN,example.com),(OR,((SRC-IP-CIDR,192.168.0.0/16),(SRC-PORT,7777)))),DIRECT
+```
 
 ---
 

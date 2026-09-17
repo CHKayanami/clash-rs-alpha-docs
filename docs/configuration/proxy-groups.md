@@ -27,10 +27,50 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **`name`** | 字符串 | **必填** | 无 | 策略组的唯一名称（在 `rules` 中被规则引用）。 |
 | **`type`** | **枚举字符串** | **必填** | 无 | 策略组类型，可选值见上方枚举清单。 |
-| **`proxies`** | 字符串列表 | 条件必填 | `[]` | 显式包含的节点或子策略组名称列表。内置保留名包含 `DIRECT`（直连）与 `REJECT`（拦截）。当配置了 `use` 时本字段可省略。 |
+| **`proxies`** | 字符串列表 | 条件必填 | `[]` | 显式包含的节点或子策略组名称列表。内置保留名包含 `DIRECT`（直连）与 `REJECT`（拦截）。当配置了 `use` 或 `include-all` 时本字段可省略。 |
 | **`use`** | 字符串列表 | 可选 | `[]` | 动态引入的外部订阅提供者（[proxy-providers](/configuration/proxy-providers)）名称列表。其包含的所有可用节点将动态注入本组。 |
-| **`include-all`** | 布尔值 | 可选 | `false` | 若设为 `true`，核心会自动将当前配置中定义的所有有效代理节点直接全部加入本组。 |
+| **`include-all`** | 布尔值 | 可选 | `false` | 若设为 `true`，核心会自动将当前配置中定义的所有有效代理节点直接全部加入本组（排除 `DIRECT`/`REJECT` 与自身）。 |
+| **`filter`** | 正则表达式 | 可选 | 无 | **节点名称正则过滤器**。用于从 `use` 引入的提供者节点或 `include-all` 节点中按名称精确筛选。基于 `fancy-regex` 引擎，支持大小写忽略标志（如 `(?i)`）及零宽断言（Lookaround）。 |
+| **`empty-fallback`** | 字符串 | 可选 | 无 | **空节点安全兜底**。当组内节点因正则过滤无匹配或外部订阅为空导致可用节点为 0 时，自动回退到指定的兜底节点（如 `"DIRECT"`、`"REJECT"` 或特定节点名称），避免连接调度直接抛错。 |
 | **`icon`** | 字符串 (URL) | 可选 | 无 | 在 Web 面板中展示的图标直链。 |
+
+---
+
+## 节点过滤与空节点兜底机制 (`filter` & `empty-fallback`)
+
+在配置机场订阅或大规模节点时，通常需要根据地区（如香港、日本、美国）自动分类构建子策略组。`clash-rs` 为**所有 6 类策略组**均提供了原生的高性能正则过滤与空列表防灾机制：
+
+```yaml
+proxy-groups:
+  # 示例 1：从全量节点中通过 include-all + filter 自动汇聚香港节点测速，无节点时拒接防漏
+  - name: "HK-Auto"
+    type: url-test
+    include-all: true               # 汇集所有已定义的代理节点
+    filter: "(?i)香港|HK|HongKong"   # 不区分大小写的正则筛选
+    empty-fallback: "REJECT"        # 若无匹配节点，兜底为 REJECT 避免意外走直连
+    url: "http://www.gstatic.com/generate_204"
+    interval: 300
+    lazy: true
+    tolerance: 50
+    icon: "https://example.com/hk.png"
+
+  # 示例 2：从外部订阅中通过 use + filter 筛选美国节点，无节点时兜底直连
+  - name: "US-Nodes"
+    type: select
+    use:
+      - airport-sub                 # 从 proxy-providers 引入订阅
+    filter: "(?i)美国|US|United States"
+    empty-fallback: "DIRECT"        # 订阅故障或无节点时自动回退为直连
+    proxies:
+      - DIRECT                      # 支持在 use 基础上追加显式节点
+    icon: "https://example.com/us.png"
+```
+
+::: tip 支持复杂的 Lookaround 零宽断言
+由于底层采用了 `fancy-regex` 解析引擎，你可以编写包含正向/负向前瞻或后顾断言的高级正则。例如：
+- 筛选所有不含流媒体或官网提示的节点：`^(?!.*(官网|重置|流量|到期)).*$`
+- 仅筛选包含倍率限制的节点：`(?i)(?=.*(0\.5x|1x)).*香港`
+:::
 
 ---
 

@@ -44,9 +44,10 @@ tun:
 | **`gso`** | 布尔值 | 可选 | `true` (Linux) | **Linux 专属**。启用通用分段卸载 (Generic Segmentation Offload)，大幅度提升大包吞吐吞吐率。 |
 | **`gso-max-size`** | 整数 | 可选 | `65536` | **Linux 专属**。GSO 最大缓冲区大小（字节）。 |
 | **`udp-timeout`** | 整数 (秒) | 可选 | `300` | UDP 会话闲置老化超时时长。 |
-| **`endpoint-independent-nat`** | 布尔值 | 可选 | `false` | 是否开启 Full-cone NAT (全锥型 NAT)，改善 P2P 连通率。 |
+| **`file-descriptor`** | 整数 (i32) | 可选 | 无 | 传入外部程序预先创建并传递的文件描述符（与 `device: "fd://3"` 等效）。 |
 | **`route-table`** | 整数 (u32) | 可选 | `2468` | **Linux 专属**。策略路由表索引 (别名: `iproute2-table-index`)。 |
 | **`iproute2-rule-index`** | 整数 (u32) | 可选 | `8964` | **Linux 专属**。策略路由规则优先级序号。 |
+| **`so-mark`** | 整数 (u32) | 可选 | `0` | **Linux 专属**。TUN 网卡自身发出流量的 fwmark 路由标记。 |
 
 ---
 
