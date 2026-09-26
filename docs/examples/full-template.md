@@ -33,6 +33,7 @@ bind-address: "127.0.0.1" # 监听地址 ("*" 监听所有网卡)
 mode: rule              # 模式：rule (规则) | global (全局) | direct (直连)
 log-level: info         # 日志：trace | debug | info | warning | error | off
 ipv6: false             # 是否开启 IPv6 解析应答
+quic: true              # 是否放行 QUIC (UDP 443) 流量 (设为 false 将直接阻断强制降级回退至 TCP)
 
 # ── 3. 外部控制器 (RESTful API & Web UI) ──────────────────────────────────────
 external-controller: 127.0.0.1:9090
@@ -104,6 +105,10 @@ ebpf:
   auto-direct-offload: true
   lan:
     bypass-src-ports: [22, 67, 68, 5353]
+    # 局域网客户端源 MAC 白名单过滤（若配置，仅拦截指定 MAC 设备的流量走代理，其余直连，上限 1024 条）
+    # proxy-src-macs:
+    #   - "00:11:22:33:44:55"
+    #   - "aa:bb:cc:dd:ee:ff"
   target:
     bypass-dst-ports: [123, 500, 4500]
   host:

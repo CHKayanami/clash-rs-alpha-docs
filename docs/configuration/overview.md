@@ -18,7 +18,8 @@
 | **`mode`** | **枚举** | 可选 | `rule` | 路由工作模式 (`rule` / `global` / `direct`) | [基础通用配置](/configuration/general) |
 | **`log-level`** | **枚举** | 可选 | `info` | 日志输出级别 (`trace` / `debug` / `info` / `warn` / `error` / `off`) | [基础通用配置](/configuration/general) |
 | **`ipv6`** | 布尔值 | 可选 | `false` | 是否启用 IPv6 DNS 响应与解析支持 | [基础通用配置](/configuration/general) |
-| **`routing-mark`** | 整数 (u32) | 可选 | 无 | Linux 平台 Clash 自身出站流量的 fwmark 标记（防止路由环路） | [基础通用配置](/configuration/general#防火墙标记与接口绑定) |
+| **`quic`** | 布尔值 | 可选 | `true` | 是否放行 QUIC (UDP 443) 流量（设为 `false` 强制回退 TCP） | [基础通用配置](/configuration/general#quic-流量控制-quic)
+| **`routing-mark`** | 整数 (u32) | 可选 | 无 | Linux 平台 Clash 自身出站流量的 fwmark 标记（防止路由环路） | [基础通用配置](/configuration/general#ipv6-与出站绑定) |
 | **`external-controller`** | 字符串 | 可选 | 无 (不开启) | 外部控制 REST API 监听地址（如 `127.0.0.1:9090`） | [外部控制器](/configuration/external-controller) |
 | **`external-controller-unix`** | 字符串 | 可选 | 无 | Unix Domain Socket 路径 (Linux/macOS) | [外部控制器](/configuration/external-controller) |
 | **`external-controller-pipe`** | 字符串 | 可选 | 无 | Windows Named Pipe 命名管道路径 (Windows 专属) | [外部控制器](/configuration/external-controller) |
@@ -89,6 +90,7 @@ bind-address: "127.0.0.1"
 mode: rule
 log-level: info
 ipv6: false
+quic: true
 
 # 2. 外部控制器与 Web 面板
 external-controller: 127.0.0.1:9090

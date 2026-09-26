@@ -16,6 +16,7 @@ mode: rule
 log-level: info
 allow-lan: true
 bind-address: "*"
+quic: true                 # 是否允许 QUIC (UDP 443)，设为 false 可强制降级回退 TCP 规避运营商 QoS 限速
 
 # 外部控制面板
 external-controller: 0.0.0.0:9090
@@ -50,6 +51,10 @@ ebpf:
       - 67
       - 68
       - 5353
+    # 局域网源 MAC 白名单（若只想让特定几台设备走代理，可配置其 MAC；未列出的设备一律直连放行）
+    # proxy-src-macs:
+    #   - "00:11:22:33:44:55"
+    #   - "aa:bb:cc:dd:ee:ff"
 
   # 软路由宿主机本机不代理，仅作为局域网网关转发
   host:
