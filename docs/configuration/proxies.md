@@ -266,14 +266,51 @@ proxies:
     # Salamander 协议混淆 (防审查识别)
     obfs: salamander
     obfs-password: "obfs-secret-key"
-    # Brutal 拥塞控制宽带提示 (Mbps)
+    # Brutal 拥塞控制带宽提示 (支持纯数字 Mbps 或带单位字符串，如 "1000 Mbps", "50 MB/s")
+    # 设置 up > 0 将启用 Brutal 拥塞控制算法；未设置或为 0 时回退至标准 BBR 拥塞控制
     up: 50
     down: 200
     # QUIC 性能调优选项
-    cwnd: 4                         # 初始拥塞窗口大小
-    udp-mtu: 1400                   # UDP 载荷 MTU
-    disable-mtu-discovery: false    # 是否关闭 MTU 自动探测
+    max-stream-receive-window: 8388608       # 单流最大接收窗口字节数 (默认: 8 MiB)
+    max-connection-receive-window: 20971520  # 连接最大接收窗口字节数 (默认: 20 MiB)
+    udp-mtu: 1400                            # UDP 载荷 MTU 大小
+    disable-mtu-discovery: false             # 是否关闭 MTU 自动探测
+    # 服务端证书指纹固定 (自签证书校验推荐)
+    fingerprint: "A400A045BC82C4EDCB82D2DA0508EDC3351A5C4EFCB71DAA72C2A877D1B92C7C" # 服务端证书 SHA-256 十六进制指纹
+    # mTLS 客户端双向认证 (必须成对配置，支持文件路径或内联 PEM)
+    # tls-cert: /path/to/client.crt          # 客户端证书路径或内联 PEM
+    # tls-key: /path/to/client.key            # 客户端私钥路径或内联 PEM
 ```
+
+#### Hysteria 2 配置参数详解（基于代码实现）
+
+| 参数名 | 类型 | 默认值 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `name` | 字符串 | 必填 | 节点唯一名称 |
+| `type` | 字符串 | `hysteria2` | 协议类型 |
+| `server` | 字符串 | 必填 | 服务端地址（域名或 IP） |
+| `port` | 整数 | 必填 | 服务端默认连接端口 |
+| `password` | 字符串 | 必填 | Hysteria 2 认证密码凭据 |
+| `ports` | 字符串 | 无 | 端口跳跃范围（如 `"20000-40000"` 或 `"20000-30000,35000"`），建连时动态挑选端口规避 UDP QoS |
+| `obfs` | 字符串 | 无 | 混淆协议类型，代码仅支持 `salamander` |
+| `obfs-password` | 字符串 | 无 | 混淆密码（当配置 `obfs: salamander` 时**必填**，否则启动报错） |
+| `up` | 整数 / 字符串 | 无 | 上行带宽。支持纯数字（Mbps，如 `50`）或带单位字符串（如 `"1000 Mbps"`, `"50 MB/s"`）。**配置大于 0 时启用 Brutal 拥塞控制；未配置或为 0 时使用 BBR** |
+| `down` | 整数 / 字符串 | 无 | 下行带宽提示，建连协商时通知服务端发送速率 |
+| `sni` | 字符串 | `server` 域名 | TLS SNI 服务器名称指示 |
+| `skip-cert-verify` | 布尔值 | `false` | 是否跳过 TLS 证书合法性验证 |
+| `alpn` | 字符串数组 | `["h3"]` | QUIC ALPN 协议列表 |
+| `fingerprint` | 字符串 | 无 | 服务端证书 SHA-256 十六进制指纹比对。当自签证书时建议搭配 `skip-cert-verify: true` + `fingerprint` 固定证书公钥哈希 |
+| `ca` / `ca-str` | 字符串 | 无 | ⚠️ **注意**：代码中暂未接入自定义 CA，配置 `ca` 将报错阻止启动，自签场景请直接使用 `fingerprint` |
+| `tls-cert` | 字符串 | 无 | mTLS 客户端证书文件路径或内联 PEM（与 `tls-key` 必须成对配置或同时省略） |
+| `tls-key` | 字符串 | 无 | mTLS 客户端私钥文件路径或内联 PEM（与 `tls-cert` 必须成对配置或同时省略） |
+| `max-stream-receive-window` | 整数 | `8388608` (8 MiB) | 单流最大接收窗口字节数 (QUIC Stream Receive Window) |
+| `max-connection-receive-window` | 整数 | `20971520` (20 MiB) | 连接最大接收窗口字节数 (QUIC Connection Receive Window) |
+| `udp-mtu` | 整数 | 无 | UDP 载荷 MTU 大小（如 `1400`），未设置时自适应最大 datagram 大小 |
+| `disable-mtu-discovery` | 布尔值 | `false` | 是否禁用 QUIC 路径 MTU 自动发现 |
+
+::: warning 关于前置链式代理
+由于底层 QUIC 独立建立 UDP 套接字与端口跳跃机制，当前 `hysteria2` 节点**暂不支持** `connect-via` (别名 `dialer-proxy`)。
+:::
 
 ---
 
