@@ -1,10 +1,10 @@
-# 核心概念与架构
+# 流量如何经过 Clash-rs
 
-深入理解 **clash-rs** 的内部架构与流量流动模型，能帮助你更精确地调优配置并排查网络问题。
+使用 Clash-rs 时，先让应用流量进入代理，再通过规则决定走哪个节点、直接连接还是阻止访问。下面介绍配置中几个常见概念。
 
 ---
 
-## 整体数据流向拓扑
+## 流量处理过程
 
 ```mermaid
 flowchart LR
@@ -47,8 +47,8 @@ flowchart LR
    - `HTTP` / `SOCKS5` / `mixed-port`：应用程序主动配置代理端口。
    - `Shadowsocks` / `AnyTLS`：作为服务端接收外部客户端接入。
 2. **系统级透明代理**：
-   - `TUN`：创建系统虚拟网卡并接管默认路由（支持 gVisor 用户态栈或 System 内核栈）。
-   - `eBPF`：在 Linux 内核层利用 TC (Traffic Control) 拦截入站与出站，具备直连快路径免用户态拷贝能力。
+   - `TUN`：创建系统虚拟网卡并接管默认路由，无需逐个应用配置代理。
+   - `eBPF`：在 Linux 上接管应用流量，并加速符合直连规则的连接。
    - `TProxy` / `Redir`：传统的 Linux iptables / nftables 透明代理模式。
 
 ---
@@ -57,21 +57,16 @@ flowchart LR
 
 在透明代理（TUN / eBPF / TProxy）模式下，客户端发起连接的目标往往只是一个目标 IP（尤其是通过 Fake-IP 或直接 IP 连接）。
 
-`clash-rs` 内置的高性能 Sniffer 会在 TCP 握手完成后的首个应用层数据包中，以**零拷贝**方式提取真实的域名：
-- **TLS SNI**：解析 Client Hello 中的 Server Name Indication；
-- **HTTP Host**：解析 GET/POST 等 HTTP 请求头中的 Host 字段；
-- **QUIC SNI**：解析 UDP QUIC Initial 数据包中的域名信息。
-
-提取域名后，该连接会重新由域名规则（`DOMAIN`, `DOMAIN-SUFFIX` 等）进行高精度匹配。
+开启域名嗅探后，Clash-rs 会尝试从 HTTP、HTTPS 和 QUIC 连接中识别访问的域名，让这些连接也能按网站规则分流。能否识别取决于连接是否包含可读取的域名信息。
 
 ---
 
 ## 3. DNS 与 更灵活的 DNS2 引擎
 
-DNS 在现代代理体系中至关重要，负责解决 DNS 污染并提供 Fake-IP 映射：
+DNS 用于把网站域名转换为连接地址。你可以选择合适的 DNS 服务，并让不同网站使用不同的解析方式：
 
 - **传统 DNS 引擎 (`dns:`)**：采用常见的 `nameserver`、`fallback`、`fake-ip` 与 `nameserver-policy` 策略，适合绝大多数标准场景。
-- **更灵活的 DNS2 引擎 (`dns2:`)**：全新的基于路由规则的 DNS 架构。将每个 DNS 上游赋予独立的 `tag`，支持为上游绑定 `detour`（穿透特定代理节点解析），并通过 `request` / `response` 规则在请求发起前和响应收到后分别执行细粒度路由策略。
+- **更灵活的 DNS2 引擎 (`dns2:`)**：可以按查询的域名和返回的结果选择 DNS 服务，也可以指定通过哪个代理发送查询；适合需要更细致 DNS 分流的场景。
 
 ---
 
@@ -88,7 +83,7 @@ DNS 在现代代理体系中至关重要，负责解决 DNS 污染并提供 Fake
 
 出站层负责最终将流量安全送出：
 
-- **代理协议**：支持 Shadowsocks、AnyTLS、Hysteria2、TUIC、VLESS、VMess、Trojan、WireGuard 等。
+- **代理协议**：支持 Shadowsocks、AnyTLS、Hysteria2、TUIC、VLESS、VMess、Trojan、WireGuard 等，各协议的功能和配置见 [出站协议总览](/configuration/proxies)。VLESS 支持 REALITY、Encryption 和 XHTTP。
 - **策略组 (Proxy Groups)**：
   - `select`：手动选择节点；
   - `url-test`：自动测速并切换到延迟最低的节点；

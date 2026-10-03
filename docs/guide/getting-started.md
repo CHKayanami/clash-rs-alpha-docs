@@ -6,7 +6,7 @@
 
 ## 1. 下载与安装
 
-`clash-rs` 提供了针对主流操作系统与 CPU 架构的预编译可执行文件：
+`clash-rs` 提供了针对主流操作系统与 CPU 架构的可执行程序：
 
 - 访问官方发布页面：[GitHub Releases](https://github.com/CHKayanami/clash-rs/releases)
 - 下载对应平台压缩包（如 Linux `x86_64-unknown-linux-musl` / `aarch64`、macOS `x86_64-apple-darwin` / `aarch64-apple-darwin`、Windows `x86_64-pc-windows-msvc`）。
@@ -19,7 +19,7 @@
 
 ## 2. 最小配置文件示例
 
-在可执行文件同级目录创建 `config.yaml`（或者放置在 `~/.config/clash-rs/config.yaml`）：
+在启动命令的当前工作目录创建 `config.yaml`，或使用 `-d` / `-c` 指定其他目录与文件。不会自动搜索可执行文件目录或 `~/.config/clash-rs/`：
 
 ```yaml
 # 混合入站端口（同时支持 HTTP 与 SOCKS5）
@@ -94,7 +94,7 @@ rules:
 ::: code-group
 
 ```bash [默认路径]
-# 默认读取当前工作目录或 ~/.config/clash-rs/ 下的 config.yaml
+# 默认读取当前工作目录下的 config.yaml
 ./clash-rs
 ```
 
@@ -141,7 +141,7 @@ curl --socks5-hostname 127.0.0.1:7890 https://httpbin.org/ip
 ## 5. 网页控制面板 (Dashboard)
 
 ### 🌟 首推：官方内置面板（零配置开箱即用）
-`clash-rs` 二进制文件中直接内置了专属的现代 Web 控制面板。只要配置了 `external-controller: 127.0.0.1:9090`，无需下载任何前端包，启动后直接在浏览器中打开：
+使用带内置控制面板的版本时，配置了 `external-controller: 127.0.0.1:9090`，无需下载任何前端包，启动后直接在浏览器中打开：
 
 👉 **`http://127.0.0.1:9090/ui`**
 

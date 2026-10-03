@@ -1,6 +1,33 @@
 import process from 'node:process'
 import { defineConfig } from 'vitepress'
 
+const proxyItems = [
+  { text: '协议总览与通用选项', link: '/configuration/proxies' },
+  { text: '传输、TLS 与浏览器指纹', link: '/configuration/proxies/transport-security' },
+  { text: 'H2MUX 多路复用', link: '/configuration/proxies/multiplex' },
+  { text: 'Shadowsocks', link: '/configuration/proxies/shadowsocks' },
+  {
+    text: 'VLESS', link: '/configuration/proxies/vless', collapsed: false,
+    items: [
+      { text: 'VLESS Encryption', link: '/configuration/proxies/vless-encryption' },
+      { text: 'XHTTP', link: '/configuration/proxies/xhttp' },
+    ]
+  },
+  { text: 'VMess', link: '/configuration/proxies/vmess' },
+  { text: 'Trojan', link: '/configuration/proxies/trojan' },
+  { text: 'Hysteria 2', link: '/configuration/proxies/hysteria2' },
+  { text: 'TUIC v5', link: '/configuration/proxies/tuic' },
+  { text: 'AnyTLS', link: '/configuration/proxies/anytls' },
+  { text: 'ShadowQUIC', link: '/configuration/proxies/shadowquic' },
+  { text: 'WireGuard', link: '/configuration/proxies/wireguard' },
+  { text: 'SOCKS5', link: '/configuration/proxies/socks5' },
+  { text: 'SSH', link: '/configuration/proxies/ssh' },
+  { text: 'Tailscale', link: '/configuration/proxies/tailscale' },
+  { text: 'Tor', link: '/configuration/proxies/tor' },
+  { text: 'Direct', link: '/configuration/proxies/direct' },
+  { text: 'Reject', link: '/configuration/proxies/reject' },
+]
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Clash-rs 配置文档',
@@ -70,7 +97,7 @@ export default defineConfig({
           { text: 'TUN 虚拟网卡接管', link: '/configuration/tun' },
           { text: 'eBPF 内核透明代理 ⚡', link: '/configuration/ebpf' },
           { text: '域名嗅探 (Domain Sniffer)', link: '/configuration/sniffer' },
-          { text: '出站代理节点 (Proxies)', link: '/configuration/proxies' },
+          { text: '出站代理节点 (Proxies)', link: '/configuration/proxies', collapsed: false, items: proxyItems },
           { text: '策略组 (Proxy Groups)', link: '/configuration/proxy-groups' },
           { text: '代理提供者 (Proxy Providers)', link: '/configuration/proxy-providers' },
           { text: '分流规则 (Rules)', link: '/configuration/rules' },
