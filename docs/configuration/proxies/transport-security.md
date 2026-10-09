@@ -60,7 +60,7 @@ H2 需要 `h2-opts`，gRPC 需要 `grpc-opts`。路径、Host 和服务名都按
 
 ## TLS：加密连接并验证服务器
 
-TLS 用来保护到服务器的连接。VLESS、VMess 和 SOCKS5 按需设置 `tls: true`；Trojan、AnyTLS 始终使用 TLS；Hysteria2、TUIC 不需要额外打开此开关。
+TLS 用来保护到服务器的连接。VLESS、VMess、HTTP 和 SOCKS5 按需设置 `tls: true`；Trojan、AnyTLS 始终使用 TLS；Hysteria2、TUIC 不需要额外打开此开关。
 
 ### 服务器名称
 
@@ -69,7 +69,7 @@ TLS 用来保护到服务器的连接。VLESS、VMess 和 SOCKS5 按需设置 `t
 | 协议 | 字段名 |
 | --- | --- |
 | VLESS、VMess | `server-name`，也可写 `servername` |
-| Trojan、AnyTLS、SOCKS5、Hysteria2、TUIC | `sni` |
+| Trojan、AnyTLS、HTTP、SOCKS5、Hysteria2、TUIC | `sni` |
 
 不要把不同协议的字段名混用。例如 VLESS 使用 `server-name`，不能直接改写成 `sni`。
 
@@ -77,7 +77,7 @@ TLS 用来保护到服务器的连接。VLESS、VMess 和 SOCKS5 按需设置 `t
 
 ### ALPN
 
-`alpn` 用于与服务端协商连接使用的应用协议，一般保留默认值。VLESS、Trojan、AnyTLS、Hysteria2 和 TUIC 支持自定义；VMess 自动按传输方式选择，SOCKS5 无需配置。
+`alpn` 用于与服务端协商连接使用的应用协议，一般保留默认值。VLESS、Trojan、AnyTLS、Hysteria2 和 TUIC 支持自定义；VMess 自动按传输方式选择，HTTP 固定协商 `http/1.1`，SOCKS5 无需配置。
 
 XHTTP 使用 `stream-one` 或搭配 REALITY 时需要支持 `h2`，详见 [XHTTP](./xhttp)。
 
@@ -95,7 +95,7 @@ client-fingerprint: chrome
 
 ## 固定服务器证书
 
-`fingerprint` 用来确认连接的是指定证书的服务器，与 `client-fingerprint` 是两个不同的选项。VMess、Trojan、AnyTLS、Hysteria2，以及 XHTTP 的独立下载端点支持它；VLESS 主节点和 SOCKS5 不支持。
+`fingerprint` 用来确认连接的是指定证书的服务器，与 `client-fingerprint` 是两个不同的选项。VMess、Trojan、AnyTLS、HTTP、Hysteria2，以及 XHTTP 的独立下载端点支持它；VLESS 主节点和 SOCKS5 不支持。
 
 填写服务器证书的 SHA-256 指纹：连续的 64 位十六进制字符，不加 `sha256/` 前缀。可以从代理节点配置中获取，也可以从证书文件计算：
 
@@ -114,6 +114,6 @@ tls-cert: /path/to/client.crt
 tls-key: /path/to/client.key
 ```
 
-VLESS 普通 TLS、VMess、Trojan、AnyTLS、Hysteria2 和 TUIC 支持此功能；SOCKS5 不支持。XHTTP 独立下载端点使用 `certificate` / `private-key`，见其专页。REALITY 不使用这组客户端证书。
+VLESS 普通 TLS、VMess、Trojan、AnyTLS、Hysteria2 和 TUIC 支持此功能；HTTP 和 SOCKS5 不支持。XHTTP 独立下载端点使用 `certificate` / `private-key`，见其专页。REALITY 不使用这组客户端证书。
 
 `ca` / `ca-str` 不是通用选项，当前也不能用于 Hysteria2 的自定义 CA 配置。

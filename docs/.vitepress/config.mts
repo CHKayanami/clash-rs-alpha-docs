@@ -20,6 +20,7 @@ const proxyItems = [
   { text: 'AnyTLS', link: '/configuration/proxies/anytls' },
   { text: 'ShadowQUIC', link: '/configuration/proxies/shadowquic' },
   { text: 'WireGuard', link: '/configuration/proxies/wireguard' },
+  { text: 'HTTP', link: '/configuration/proxies/http' },
   { text: 'SOCKS5', link: '/configuration/proxies/socks5' },
   { text: 'SSH', link: '/configuration/proxies/ssh' },
   { text: 'Tailscale', link: '/configuration/proxies/tailscale' },

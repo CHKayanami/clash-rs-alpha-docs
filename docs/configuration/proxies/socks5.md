@@ -24,4 +24,4 @@ proxies:
 - 当前不支持浏览器 `client-fingerprint`、证书 `fingerprint`、mTLS 或自定义 ALPN。
 - 当前不支持 H2MUX，不要配置 `smux`。
 
-当前没有 HTTP 代理出站 `type: http`。HTTP 代理入口见 [入站配置](/configuration/inbounds)。
+HTTP 代理出站见 [HTTP](./http)。应用程序连接 clash-rs 本地的 HTTP 代理入口见 [入站配置](/configuration/inbounds)。
