@@ -16,6 +16,9 @@ hero:
       text: 配置参数速查 ⚙️
       link: /configuration/overview
     - theme: alt
+      text: eBPF 透明代理 ⚡
+      link: /configuration/ebpf
+    - theme: alt
       text: 更灵活的DNS ⚡
       link: /configuration/dns2
 
@@ -26,12 +29,13 @@ features:
   - icon: ⚡
     title: Linux 透明代理加速
     details: 在 Linux 上接管应用流量，并加速符合直连规则的连接。
+  - icon: 🎮
+    title: FullCone NAT 支持
+    details: 支持 FullCone NAT，显著改善联机游戏、P2P 下载与实时语音通信体验。
+    link: /configuration/fullcone
   - icon: 🎯
     title: 灵活的 DNS 分流
     details: 按域名和解析结果选择 DNS 服务，也可让 DNS 查询经过指定代理。
-  - icon: 🔍
-    title: 自动识别访问域名
-    details: 从支持的连接中识别网站域名，让透明代理也能按域名规则分流。
   - icon: 🌐
     title: TUN 透明代理
     details: 接管设备的网络流量，无需逐个应用设置代理；按操作系统配置虚拟网卡和路由。
